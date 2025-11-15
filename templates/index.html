@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieSent - Sentiment Analysis</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="page active">
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>MovieSent</h1>
+                <p>AI-Powered Sentiment Analysis</p>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="loginEmail" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword" class="password-input" placeholder="••••••••">
+                    <i class="fas fa-eye password-icon" onclick="togglePassword(this, 'loginPassword')"></i>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="handleLogin()">Sign In</button>
+            <div class="auth-toggle">
+                New here? <button onclick="showRegister()">Create Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="registerPage" class="page">
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>MovieSent</h1>
+                <p>Join Our Community</p>
+            </div>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="registerName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="registerEmail" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="registerPassword" class="password-input" placeholder="••••••••">
+                    <i class="fas fa-eye password-icon" onclick="togglePassword(this, 'registerPassword')"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="registerConfirm" class="password-input" placeholder="••••••••">
+                    <i class="fas fa-eye password-icon" onclick="togglePassword(this, 'registerConfirm')"></i>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="handleRegister()">Create Account</button>
+            <div class="auth-toggle">
+                Already a member? <button onclick="showLogin()">Sign in</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="dashboardPage" class="page">
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <span>🎬</span>
+                <div>MovieSent</div>
+            </div>
+            <div class="navbar-menu">
+                <button onclick="showDashboard()">Dashboard</button>
+                <button onclick="showPrediction()">Analyze</button>
+                <button onclick="showProfile()">Profile</button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="dashboard-content">
+            <div class="welcome-section">
+                <h2>Welcome, <span id="userName">User</span>!</h2>
+                <p>Start analyzing movie reviews with our advanced AI sentiment analysis engine</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Analyses</h3>
+                    <div class="number" id="totalAnalyses">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Positive Reviews</h3>
+                    <div class="number" id="positiveCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Negative Reviews</h3>
+                    <div class="number" id="negativeCount">0</div>
+                </div>
+            </div>
+
+            <div class="prediction-card">
+                <h2>Ready to Analyze?</h2>
+                <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Start by analyzing your first movie review</p>
+                <button class="btn btn-primary" onclick="showPrediction()" style="max-width: 250px;">
+                    Begin Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PREDICTION PAGE -->
+<div id="predictionPage" class="page">
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <span>🎬</span>
+                <div>MovieSent</div>
+            </div>
+            <div class="navbar-menu">
+                <button onclick="showDashboard()">Dashboard</button>
+                <button onclick="showPrediction()">Analyze</button>
+                <button onclick="showProfile()">Profile</button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="dashboard-content">
+            <div class="prediction-card">
+                <h2>Sentiment Analysis Engine</h2>
+
+                <div class="form-section">
+                    <label>Enter Movie Review</label>
+                    <textarea id="reviewInput" placeholder="Share your movie thoughts..."></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label>Select AI Model</label>
+                    <div class="model-selector">
+                        <div class="model-option">
+                            <input type="radio" id="modelLR" name="model" value="lr" checked>
+                            <label for="modelLR">
+                                <div class="model-name">Logistic Regression</div>
+                                <div style="font-size: 0.8rem; color: #999;">Fast & Accurate</div>
+                            </label>
+                        </div>
+                        <div class="model-option">
+                            <input type="radio" id="modelLSTM" name="model" value="lstm">
+                            <label for="modelLSTM">
+                                <div class="model-name">LSTM Network</div>
+                                <div style="font-size: 0.8rem; color: #999;">Deep Learning</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="analyzeReview()">Analyze</button>
+                </div>
+            </div>
+
+            <div id="resultsSection" class="results-section hidden">
+                <div id="resultContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div id="profilePage" class="page">
+    <div class="dashboard-container">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <span>🎬</span>
+                <div>MovieSent</div>
+            </div>
+            <div class="navbar-menu">
+                <button onclick="showDashboard()">Dashboard</button>
+                <button onclick="showPrediction()">Analyze</button>
+                <button onclick="showProfile()">Profile</button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="dashboard-content">
+            <div class="prediction-card">
+                <h2>User Profile</h2>
+                <div style="margin-top: 2.5rem;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <p id="profileName" style="font-size: 1.2rem; color: #1a1a1a; margin-top: 0.7rem; font-weight: 700;">-</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <p id="profileEmail" style="font-size: 1.2rem; color: #1a1a1a; margin-top: 0.7rem; font-weight: 700;">-</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Analyses</label>
+                        <p id="profileAnalyses" style="font-size: 1.2rem; color: #1a1a1a; margin-top: 0.7rem; font-weight: 700;">0</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Member Since</label>
+                        <p id="profileJoined" style="font-size: 1.2rem; color: #1a1a1a; margin-top: 0.7rem; font-weight: 700;">-</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <p style="font-size: 1.2rem; color: #2ecc71; margin-top: 0.7rem; font-weight: 800;">Active Member</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
