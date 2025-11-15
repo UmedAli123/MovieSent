@@ -34,6 +34,8 @@ lemmatizer = WordNetLemmatizer()
 def load_models():
     """Load all models and preprocessing tools"""
     try:
+        import os
+        
         # Load Logistic Regression model
         lr_model = joblib.load('saved_models/lr_model.pkl')
         vectorizer = joblib.load('saved_models/vectorizer.pkl')
@@ -42,8 +44,27 @@ def load_models():
         lstm_tokenizer = joblib.load('saved_models/tokenizer.pkl')
         lstm_params = joblib.load('saved_models/lstm_params.pkl')
         
-        # Load LSTM model
-        lstm_model = joblib.load('saved_models/lstm_model.pkl')
+        # Try loading LSTM model - handle different formats
+        lstm_model = None
+        lstm_error = None
+        
+        # Try loading from .h5 file first (Keras format)
+        if os.path.exists('saved_models/lstm_model.h5'):
+            try:
+                from tensorflow import keras
+                lstm_model = keras.models.load_model('saved_models/lstm_model.h5')
+            except Exception as e:
+                lstm_error = f"H5 loading failed: {str(e)}"
+        
+        # If .h5 failed or doesn't exist, try .pkl file
+        if lstm_model is None and os.path.exists('saved_models/lstm_model.pkl'):
+            try:
+                import tensorflow as tf
+                # Set custom object scope for legacy compatibility
+                with tf.keras.utils.custom_object_scope({}):
+                    lstm_model = joblib.load('saved_models/lstm_model.pkl')
+            except Exception as e:
+                lstm_error = f"PKL loading failed: {str(e)}"
         
         return {
             'lr_model': lr_model,
@@ -51,6 +72,7 @@ def load_models():
             'lstm_model': lstm_model,
             'lstm_tokenizer': lstm_tokenizer,
             'lstm_params': lstm_params,
+            'lstm_error': lstm_error,
             'success': True
         }
     except Exception as e:
@@ -94,6 +116,14 @@ def predict_logistic_regression(review, models):
 
 def predict_lstm(review, models):
     """Predict sentiment using LSTM"""
+    if models.get('lstm_model') is None:
+        error_msg = models.get('lstm_error', 'LSTM model not available')
+        return {
+            'sentiment': 'Error',
+            'confidence': 0,
+            'error': error_msg
+        }
+    
     try:
         from tensorflow.keras.preprocessing.sequence import pad_sequences
         
@@ -213,7 +243,15 @@ def main():
         st.error("Failed to load models. Please check if all model files are present in the 'saved_models' directory.")
         return
     
-    st.success("✅ Models loaded successfully!")
+    # Show model status
+    if models.get('lstm_model') is not None:
+        st.success("✅ All models loaded successfully!")
+    else:
+        st.warning("⚠️ Logistic Regression loaded. LSTM model unavailable (using Logistic Regression only)")
+        if models.get('lstm_error'):
+            with st.expander("🔍 LSTM Error Details"):
+                st.error(models['lstm_error'])
+                st.info("**Tip:** The LSTM model may have compatibility issues. Using Logistic Regression for predictions.")
     
     # Main content
     st.header("Enter Your Movie Review")
